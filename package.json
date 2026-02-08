@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "obsidian-note-protection",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Password protection and file-level encryption for your Obsidian notes with idle auto-lock",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
@@ -10,9 +10,17 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint ."
 	},
-	"keywords": [],
-	"license": "0-BSD",
+	"keywords": [
+		"obsidian",
+		"plugin",
+		"encryption",
+		"password",
+		"security"
+	],
+	"author": "",
+	"license": "MIT",
 	"devDependencies": {
+		"@types/crypto-js": "^4.2.2",
 		"@types/node": "^16.11.6",
 		"esbuild": "0.25.5",
 		"eslint-plugin-obsidianmd": "0.1.9",
@@ -24,6 +32,7 @@
 		"jiti": "2.6.1"
 	},
 	"dependencies": {
-		"obsidian": "latest"
+		"obsidian": "latest",
+		"crypto-js": "^4.2.0"
 	}
 }
