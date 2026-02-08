@@ -1,0 +1,14 @@
+services:
+  obsidian-plugin-dev:
+    build: .
+    container_name: obsidian-protected-note-dev
+    volumes:
+      # 將本地專案掛載到容器內，這樣修改會同步
+      - .:/app
+      # 排除 node_modules，使用容器內的版本
+      - /app/node_modules
+    working_dir: /app
+    # 保持容器運行
+    stdin_open: true
+    tty: true
+    command: /bin/sh
