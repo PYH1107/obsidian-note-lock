@@ -25,67 +25,24 @@ export class FileMenuHandler {
     }
 
     /**
-     * 同步添加保護選單項目（先添加兩個選項，稍後異步檢查狀態）
+     * 同步添加保護選單項目
      */
     private addProtectionMenuItemsSync(menu: Menu, file: TFile): void {
         menu.addSeparator();
 
-        // 先添加加密選項
-        const encryptItem = menu.addItem((item) => {
-            item.setTitle("加密此檔案")
-                .setIcon("lock")
-                .onClick(async () => {
-                    await this.handleMarkProtected(file);
-                });
-        });
-
-        // 添加解密選項
-        const decryptItem = menu.addItem((item) => {
-            item.setTitle("永久解密此檔案")
-                .setIcon("unlock")
-                .onClick(async () => {
-                    await this.handleRemoveProtection(file);
-                });
-        });
-
-        // 異步檢查保護狀態並隱藏不需要的選項
-        this.plugin.protectionChecker.isProtected(file).then(isProtected => {
-            if (isProtected) {
-                // 已加密，隱藏加密選項
-                if (encryptItem && (encryptItem as any).dom) {
-                    (encryptItem as any).dom.style.display = 'none';
-                }
-            } else {
-                // 未加密，隱藏解密選項
-                if (decryptItem && (decryptItem as any).dom) {
-                    (decryptItem as any).dom.style.display = 'none';
-                }
-            }
-        });
-    }
-
-    /**
-     * 添加保護選單項目
-     */
-    private async addProtectionMenuItems(menu: Menu, file: TFile): Promise<void> {
-        menu.addSeparator();
-
-        // 檢查文件是否受保護
-        const isProtected = await this.plugin.protectionChecker.isProtected(file);
+        const isProtected = this.plugin.protectionChecker.isProtectedSync(file);
 
         if (isProtected) {
-            // 已受保護：顯示取消保護選項
             menu.addItem((item) => {
-                item.setTitle("🔓 永久解密此檔案")
+                item.setTitle("永久解密此檔案")
                     .setIcon("unlock")
                     .onClick(async () => {
                         await this.handleRemoveProtection(file);
                     });
             });
         } else {
-            // 未受保護：顯示標記為受保護選項
             menu.addItem((item) => {
-                item.setTitle("🔒 加密此檔案")
+                item.setTitle("加密此檔案")
                     .setIcon("lock")
                     .onClick(async () => {
                         await this.handleMarkProtected(file);
