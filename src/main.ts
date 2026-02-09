@@ -73,16 +73,16 @@ export default class PasswordPlugin extends Plugin {
 							if (isTabClosing && !isSameFile) {
 								// 分頁關閉：無條件清除訪問狀態，不受 justAllowedAccess 影響
 								this.accessTracker.clearAccess(this.previousFile.path);
-								this.idleTimer.reset(this.previousFile.path);
+								this.idleTimer.stop(this.previousFile.path);
 								console.debug('[Main] ✅ Access cleared (tab closed) for:', this.previousFile.path);
 							} else if (this.settings.autoEncryptOnClose && !isSameFile && !wasJustAllowed) {
 								// autoEncryptOnClose 開啟時切換檔案：清除訪問狀態
 								this.accessTracker.clearAccess(this.previousFile.path);
-								this.idleTimer.reset(this.previousFile.path);
+								this.idleTimer.stop(this.previousFile.path);
 								console.debug('[Main] ✅ Access cleared (autoEncrypt) for:', this.previousFile.path);
 							} else {
 								// 切換分頁：只停止計時器，保持訪問狀態
-								this.idleTimer.reset(this.previousFile.path);
+								this.idleTimer.stop(this.previousFile.path);
 								if (wasJustAllowed) {
 									console.debug('[Main] 🛡️  Protected from clearing (just allowed):', this.previousFile.path);
 								} else {
@@ -153,22 +153,22 @@ export default class PasswordPlugin extends Plugin {
 						if (!openPaths.has(filePath)) {
 							console.debug('[Main] 🔒 Tab closed detected via layout-change, clearing access for:', filePath);
 							this.accessTracker.clearAccess(filePath);
-							this.idleTimer.reset(filePath);
+							this.idleTimer.stop(filePath);
 						}
 					}
 				})
 			);
 
-			// 註冊閒置事件
+			// 註冊閒置事件：用戶有操作時重新倒計時
 			this.registerDomEvent(document, 'mousemove', () => {
 				if (this.previousFile) {
-					this.idleTimer.reset(this.previousFile.path);
+					this.idleTimer.restart(this.previousFile.path);
 				}
 			});
 
 			this.registerDomEvent(document, 'keydown', () => {
 				if (this.previousFile) {
-					this.idleTimer.reset(this.previousFile.path);
+					this.idleTimer.restart(this.previousFile.path);
 				}
 			});
 		});

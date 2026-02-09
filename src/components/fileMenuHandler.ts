@@ -95,7 +95,7 @@ export class FileMenuHandler {
                     try {
                         await this.plugin.protectionChecker.removeProtection(file);
                         this.plugin.accessTracker.clearAccess(file.path);
-                        this.plugin.idleTimer.reset(file.path);
+                        this.plugin.idleTimer.stop(file.path);
 
                         new Notice(`✅ 已解密：${file.name}`);
                     } catch (error) {
