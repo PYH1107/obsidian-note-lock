@@ -189,9 +189,10 @@ export default class PasswordPlugin extends Plugin {
 			this.app,
 			async (inputPassword) => {
 				console.log('[Main] 📝 Password submitted for:', file.path);
-				// 驗證密碼
-				const globalPassword = this.getGlobalPassword();
-				if (inputPassword === globalPassword) {
+				// 驗證密碼：將輸入的密碼雜湊後與儲存的雜湊比對
+				const inputHash = await this.hashPassword(inputPassword);
+				const storedHash = this.settings.password;
+				if (inputHash === storedHash) {
 					// 密碼正確，標記為已訪問
 					console.log('[Main] ✅ Password correct, marking as temporary access:', file.path);
 					this.accessTracker.markAsTemporaryAccess(file.path);
@@ -247,10 +248,14 @@ export default class PasswordPlugin extends Plugin {
 	}
 
 	/**
-	 * 取得全域密碼
+	 * 將密碼雜湊為 SHA-256
 	 */
-	getGlobalPassword(): string {
-		return this.settings.originalPassword || "";
+	async hashPassword(password: string): Promise<string> {
+		const encoder = new TextEncoder();
+		const data = encoder.encode(password);
+		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+		const hashArray = Array.from(new Uint8Array(hashBuffer));
+		return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 	}
 
 	async loadSettings() {
