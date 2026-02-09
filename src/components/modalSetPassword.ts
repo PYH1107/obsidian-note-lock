@@ -53,7 +53,7 @@ export class ModalSetPassword extends Modal {
 				text.inputEl.addEventListener("keydown", (e) => {
 					if (e.key === "Enter") {
 						const nextInput = text.inputEl.parentElement?.parentElement?.nextElementSibling?.querySelector('input');
-						if (nextInput) (nextInput as HTMLInputElement).focus();
+						if (nextInput) nextInput.focus();
 					}
 				});
 			});
@@ -71,7 +71,7 @@ export class ModalSetPassword extends Modal {
 				if (e.key === "Enter") {
 					// 跳到下一個輸入框
 					const nextInput = text.inputEl.parentElement?.parentElement?.nextElementSibling?.querySelector('input');
-					if (nextInput) (nextInput as HTMLInputElement).focus();
+					if (nextInput) nextInput.focus();
 				}
 			});
 		});
@@ -88,7 +88,7 @@ export class ModalSetPassword extends Modal {
 				if (e.key === "Enter") {
 					// 跳到下一個輸入框
 					const nextInput = text.inputEl.parentElement?.parentElement?.nextElementSibling?.querySelector('input');
-					if (nextInput) (nextInput as HTMLInputElement).focus();
+					if (nextInput) nextInput.focus();
 				}
 			});
 		});
@@ -104,7 +104,7 @@ export class ModalSetPassword extends Modal {
 				});
 				text.inputEl.addEventListener("keydown", (e) => {
 					if (e.key === "Enter") {
-						this.comparePassword();
+						void this.comparePassword();
 					}
 				});
 			});
@@ -117,7 +117,7 @@ export class ModalSetPassword extends Modal {
 					.setButtonText("確認")
 					.setCta()
 					.onClick(() => {
-						this.comparePassword();
+						void this.comparePassword();
 					})
 			)
 			.addButton((btn) =>
