@@ -42,7 +42,7 @@ export class ProtectionChecker {
      */
     async markAsProtected(file: TFile): Promise<void> {
         try {
-            await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+            await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
                 // 使用 bracket notation 確保不破壞現有結構
                 frontmatter['protected'] = 'encrypted';
             });
@@ -62,7 +62,7 @@ export class ProtectionChecker {
      */
     async removeProtection(file: TFile): Promise<void> {
         try {
-            await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+            await this.app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
                 delete frontmatter['protected'];
             });
 
