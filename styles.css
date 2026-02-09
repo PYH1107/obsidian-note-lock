@@ -15,7 +15,11 @@
 
 .app-container__lock_password {
 	filter: blur(15px);
-	z-index: -1;
+	pointer-events: none;
+}
+
+.password-modal-backdrop .modal-bg {
+	background-color: rgba(0, 0, 0, 0.6);
 }
 
 .password_modal__warning {

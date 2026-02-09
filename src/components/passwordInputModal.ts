@@ -25,10 +25,13 @@ export class PasswordInputModal extends Modal {
         // 添加背景遮罩樣式
         const modalEl = contentEl.closest('.modal-container') as HTMLElement;
         if (modalEl) {
-            modalEl.setCssProps({
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(10px)'
-            });
+            modalEl.addClass('password-modal-backdrop');
+        }
+
+        // 模糊背景內容
+        const appContainer = document.querySelector('.app-container') as HTMLElement;
+        if (appContainer) {
+            appContainer.addClass('app-container__lock_password');
         }
 
         contentEl.createEl("h2", { text: "🔒 輸入密碼" });
@@ -57,12 +60,6 @@ export class PasswordInputModal extends Modal {
 
         // 按鈕區
         const buttonContainer = contentEl.createDiv({ cls: "modal-button-container" });
-        buttonContainer.setCssProps({
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "10px",
-            marginTop: "20px"
-        });
 
         // 取消按鈕
         const cancelButton = buttonContainer.createEl("button", { text: "取消" });
@@ -112,5 +109,11 @@ export class PasswordInputModal extends Modal {
     onClose() {
         const { contentEl } = this;
         contentEl.empty();
+
+        // 移除背景模糊
+        const appContainer = document.querySelector('.app-container') as HTMLElement;
+        if (appContainer) {
+            appContainer.removeClass('app-container__lock_password');
+        }
     }
 }
