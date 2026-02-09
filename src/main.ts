@@ -32,7 +32,7 @@ export default class PasswordPlugin extends Plugin {
 		this.app.workspace.onLayoutReady(async () => {
 			// 初始化元件
 			this.protectionChecker = new ProtectionChecker(this.app);
-			this.accessTracker = new AccessTracker(); // session 
+			this.accessTracker = new AccessTracker(); // session
 			this.fileMenuHandler = new FileMenuHandler(this.app, this);
 			this.idleTimer = new IdleTimer();
 
@@ -61,18 +61,22 @@ export default class PasswordPlugin extends Plugin {
 							const wasJustAllowed = this.justAllowedAccess.has(this.previousFile.path);
 							console.log('[Main] Was just allowed?', wasJustAllowed);
 
-							// 關閉分頁時清除訪問，或 autoEncryptOnClose 開啟時清除
-							const shouldClearAccess = !file || this.settings.autoEncryptOnClose;
-							console.log('[Main] Should clear access?', shouldClearAccess, '(file is null:', !file, ', autoEncryptOnClose:', this.settings.autoEncryptOnClose, ')');
+							// 分頁關閉時一律清除，切換檔案時才考慮 justAllowedAccess
+							const isTabClosing = !file;
+							console.log('[Main] Tab closing:', isTabClosing, ', autoEncryptOnClose:', this.settings.autoEncryptOnClose);
 
-							if (shouldClearAccess && !isSameFile && !wasJustAllowed) {
-								// 關閉分頁或 autoEncryptOnClose：清除訪問狀態（重新加密）
+							if (isTabClosing && !isSameFile) {
+								// 分頁關閉：無條件清除訪問狀態，不受 justAllowedAccess 影響
 								this.accessTracker.clearAccess(this.previousFile.path);
 								this.idleTimer.reset(this.previousFile.path);
-								console.log('[Main] ✅ Access cleared for:', this.previousFile.path);
+								console.log('[Main] ✅ Access cleared (tab closed) for:', this.previousFile.path);
+							} else if (this.settings.autoEncryptOnClose && !isSameFile && !wasJustAllowed) {
+								// autoEncryptOnClose 開啟時切換檔案：清除訪問狀態
+								this.accessTracker.clearAccess(this.previousFile.path);
+								this.idleTimer.reset(this.previousFile.path);
+								console.log('[Main] ✅ Access cleared (autoEncrypt) for:', this.previousFile.path);
 							} else {
 								// 切換分頁：只停止計時器，保持訪問狀態
-								// 不啟動新的計時器，閒置計時只對當前查看的檔案有效
 								this.idleTimer.reset(this.previousFile.path);
 								if (wasJustAllowed) {
 									console.log('[Main] 🛡️  Protected from clearing (just allowed):', this.previousFile.path);
