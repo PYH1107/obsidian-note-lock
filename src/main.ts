@@ -61,8 +61,10 @@ export default class PasswordPlugin extends Plugin {
 							const wasJustAllowed = this.justAllowedAccess.has(this.previousFile.path);
 							console.log('[Main] Was just allowed?', wasJustAllowed);
 
-							// 分頁關閉時一律清除，切換檔案時才考慮 justAllowedAccess
-							const isTabClosing = !file;
+							// 判斷分頁是否被關閉：file 為 null 或 previousFile 不在任何已開啟的分頁中
+							const isTabClosing = !file || !this.app.workspace
+								.getLeavesOfType('markdown')
+								.some(leaf => (leaf.view as any)?.file?.path === this.previousFile!.path);
 							console.log('[Main] Tab closing:', isTabClosing, ', autoEncryptOnClose:', this.settings.autoEncryptOnClose);
 
 							if (isTabClosing && !isSameFile) {
@@ -129,6 +131,25 @@ export default class PasswordPlugin extends Plugin {
 					// 需要驗證密碼
 					console.log('[Main] Requesting password for:', file.path);
 					await this.requestPasswordForFile(file);
+				})
+			);
+
+			// 監聽 layout 變化，偵測分頁被關閉時清除存取權限
+			this.registerEvent(
+				this.app.workspace.on('layout-change', () => {
+					const openPaths = new Set(
+						this.app.workspace.getLeavesOfType('markdown')
+							.map(leaf => (leaf.view as any)?.file?.path)
+							.filter(Boolean)
+					);
+
+					for (const filePath of this.accessTracker.getTemporaryAccess()) {
+						if (!openPaths.has(filePath)) {
+							console.log('[Main] 🔒 Tab closed detected via layout-change, clearing access for:', filePath);
+							this.accessTracker.clearAccess(filePath);
+							this.idleTimer.reset(filePath);
+						}
+					}
 				})
 			);
 
