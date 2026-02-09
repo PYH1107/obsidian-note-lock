@@ -66,9 +66,6 @@ export class PasswordInputModal extends Modal {
         cancelButton.addEventListener("click", () => {
             console.debug('[PasswordInputModal] ❌ Cancel button clicked');
             this.close();
-            if (this.onCancel) {
-                this.onCancel();
-            }
         });
 
         // 確認按鈕
@@ -114,6 +111,12 @@ export class PasswordInputModal extends Modal {
         const appContainer = document.querySelector('.app-container') as HTMLElement;
         if (appContainer) {
             appContainer.removeClass('app-container__lock_password');
+        }
+
+        // 非提交關閉（x 按鈕、Escape、取消按鈕）時觸發取消回調
+        if (!this.isSubmitting && this.onCancel) {
+            console.debug('[PasswordInputModal] ❌ Modal closed without submit, triggering cancel');
+            this.onCancel();
         }
     }
 }
