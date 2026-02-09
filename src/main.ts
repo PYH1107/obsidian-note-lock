@@ -23,6 +23,9 @@ export default class PasswordPlugin extends Plugin {
 	// 追蹤前一個開啟的檔案
 	private previousFile: TFile | null = null;
 
+	// 防止在允許訪問後立即清除訪問權限
+	private justAllowedAccess: Set<string> = new Set();
+
 	async onload() { //the obsidian lifecycle
 		await this.loadSettings();
 
@@ -45,17 +48,24 @@ export default class PasswordPlugin extends Plugin {
 
 					// 處理前一個檔案的閒置計時器
 					if (this.previousFile) {
+						console.log('[Main] Processing previous file:', this.previousFile.path);
+						console.log('[Main] Is temporary access?', this.accessTracker.isTemporaryAccess(this.previousFile.path));
+
 						// 只對臨時訪問的檔案處理
 						if (this.accessTracker.isTemporaryAccess(this.previousFile.path)) {
 							// 防止清除正在開啟的檔案的訪問權限
 							const isSameFile = file && file.path === this.previousFile.path;
 							console.log('[Main] Is same file?', isSameFile);
 
+							// 檢查是否剛剛允許訪問
+							const wasJustAllowed = this.justAllowedAccess.has(this.previousFile.path);
+							console.log('[Main] Was just allowed?', wasJustAllowed);
+
 							// 關閉分頁時清除訪問，或 autoEncryptOnClose 開啟時清除
 							const shouldClearAccess = !file || this.settings.autoEncryptOnClose;
 							console.log('[Main] Should clear access?', shouldClearAccess, '(file is null:', !file, ', autoEncryptOnClose:', this.settings.autoEncryptOnClose, ')');
 
-							if (shouldClearAccess && !isSameFile) {
+							if (shouldClearAccess && !isSameFile && !wasJustAllowed) {
 								// 關閉分頁或 autoEncryptOnClose：清除訪問狀態（重新加密）
 								this.accessTracker.clearAccess(this.previousFile.path);
 								this.idleTimer.reset(this.previousFile.path);
@@ -64,8 +74,17 @@ export default class PasswordPlugin extends Plugin {
 								// 切換分頁：只停止計時器，保持訪問狀態
 								// 不啟動新的計時器，閒置計時只對當前查看的檔案有效
 								this.idleTimer.reset(this.previousFile.path);
-								console.log('[Main] ⏸️  Switched away from (keeping access):', this.previousFile.path);
+								if (wasJustAllowed) {
+									console.log('[Main] 🛡️  Protected from clearing (just allowed):', this.previousFile.path);
+								} else {
+									console.log('[Main] ⏸️  Switched away from (keeping access):', this.previousFile.path);
+								}
 							}
+
+							// 清除 justAllowedAccess 標記
+							this.justAllowedAccess.delete(this.previousFile.path);
+						} else {
+							console.log('[Main] ⚠️  Previous file is NOT temporary access, skipping protection logic');
 						}
 					}
 
@@ -94,6 +113,8 @@ export default class PasswordPlugin extends Plugin {
 					if (alreadyAccessed) {
 						// 已驗證，允許訪問
 						console.log('[Main] File already accessed, allowing access');
+						// 標記為剛剛允許訪問,防止立即被清除
+						this.justAllowedAccess.add(file.path);
 						// 切換回來時，重新啟動閒置計時器
 						if (this.accessTracker.isTemporaryAccess(file.path)) {
 							this.startIdleTimer(file);
@@ -185,8 +206,10 @@ export default class PasswordPlugin extends Plugin {
 		const idleTimeMinutes = parseInt(this.settings.autoLock) || 5;
 		const idleTimeMs = idleTimeMinutes * 60 * 1000;
 
+		console.log('[Main] Starting idle timer for:', file.path, 'duration:', idleTimeMs, 'ms');
 		this.idleTimer.start(file.path, idleTimeMs, async () => {
 			// 閒置時間到，清除訪問狀態
+			console.log('[Main] ⏰ Idle timer triggered for:', file.path);
 			this.accessTracker.clearAccess(file.path);
 			new Notice(`${file.name} 已鎖定，需要重新驗證密碼`);
 

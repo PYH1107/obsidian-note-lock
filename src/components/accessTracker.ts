@@ -17,22 +17,29 @@ export class AccessTracker {
      * 標記檔案為「本次已訪問」
      */
     markAsAccessed(filePath: string): void {
+        console.log('[AccessTracker] markAsAccessed:', filePath);
         this.accessedThisSession.add(filePath);
+        console.log('[AccessTracker] Current accessed files:', Array.from(this.accessedThisSession));
     }
 
     /**
      * 標記檔案為臨時訪問（需要重新驗證）
      */
     markAsTemporaryAccess(filePath: string): void {
+        console.log('[AccessTracker] markAsTemporaryAccess:', filePath);
         this.temporaryAccess.add(filePath);
         this.accessedThisSession.add(filePath);
+        console.log('[AccessTracker] Current temporary access:', Array.from(this.temporaryAccess));
+        console.log('[AccessTracker] Current accessed files:', Array.from(this.accessedThisSession));
     }
 
     /**
      * 從臨時訪問列表中移除
      */
     removeTemporaryAccess(filePath: string): void {
+        console.log('[AccessTracker] removeTemporaryAccess:', filePath);
         this.temporaryAccess.delete(filePath);
+        console.log('[AccessTracker] Current temporary access:', Array.from(this.temporaryAccess));
     }
 
     /**
@@ -60,8 +67,12 @@ export class AccessTracker {
      * 清除特定檔案的追蹤
      */
     clearAccess(filePath: string): void {
+        console.log('[AccessTracker] clearAccess:', filePath);
+        console.log('[AccessTracker] Stack trace:', new Error().stack);
         this.accessedThisSession.delete(filePath);
         this.temporaryAccess.delete(filePath);
+        console.log('[AccessTracker] After clear - accessed:', Array.from(this.accessedThisSession));
+        console.log('[AccessTracker] After clear - temporary:', Array.from(this.temporaryAccess));
     }
 
     /**
