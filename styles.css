@@ -26,6 +26,26 @@
 	color: rgb(var(--callout-error));
 }
 
+.password_modal__message {
+	margin-bottom: 1em;
+}
+
+.password_modal__message--info {
+	color: var(--text-muted);
+}
+
+.password_modal__message--error {
+	color: var(--text-error);
+}
+
+.password_modal__message--warning {
+	color: rgb(var(--callout-warning));
+}
+
+.password_modal__message--success {
+	color: var(--interactive-success);
+}
+
 .password_modal__box {
 	display: flex;
 	flex-direction: column;

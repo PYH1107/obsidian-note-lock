@@ -1,5 +1,5 @@
 import main from "../main";
-import { App, TFile, Menu, Notice } from "obsidian";
+import { App, TFile, Menu, Notice, MarkdownView } from "obsidian";
 import { PasswordInputModal } from "./passwordInputModal";
 
 export class FileMenuHandler {
@@ -68,7 +68,7 @@ export class FileMenuHandler {
             // 立即關閉檔案，防止未經驗證就查看
             const leaves = this.app.workspace.getLeavesOfType('markdown');
             for (const leaf of leaves) {
-                if ((leaf.view as any).file?.path === file.path) {
+                if (leaf.view instanceof MarkdownView && leaf.view.file?.path === file.path) {
                     leaf.detach();
                     break;
                 }

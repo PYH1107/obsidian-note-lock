@@ -37,9 +37,7 @@ export class ModalSetPassword extends Modal {
 		contentEl.createEl("h1", { text: this.isChangingPassword ? "變更密碼" : "設定密碼" });
 
 		// 提示訊息區域
-		this.messageEl = contentEl.createDiv({ cls: "password_modal__message" });
-		this.messageEl.style.marginBottom = '1em';
-		this.messageEl.style.color = '#666';
+		this.messageEl = contentEl.createDiv({ cls: "password_modal__message password_modal__message--info" });
 		this.messageEl.setText(this.isChangingPassword ? "請先輸入舊密碼" : "請輸入密碼並確認");
 
 		const div_input = contentEl.createDiv({ cls: "password_modal__box" });
@@ -129,39 +127,38 @@ export class ModalSetPassword extends Modal {
 			);
 	}
 
+	private setMessageState(cls: string, text: string) {
+		this.messageEl.className = "password_modal__message " + cls;
+		this.messageEl.setText(text);
+	}
+
 	updateMessage() {
 		if (!this.value_pass && !this.value_repass) {
-			this.messageEl.style.color = '#666';
-			this.messageEl.setText("請輸入密碼並確認");
+			this.setMessageState("password_modal__message--info", "請輸入密碼並確認");
 			return;
 		}
 
 		if (!this.value_pass) {
-			this.messageEl.style.color = 'red';
-			this.messageEl.setText("❌ 請輸入密碼");
+			this.setMessageState("password_modal__message--error", "❌ 請輸入密碼");
 			return;
 		}
 
 		if (!this.value_repass) {
-			this.messageEl.style.color = 'orange';
-			this.messageEl.setText("⚠️ 請確認密碼");
+			this.setMessageState("password_modal__message--warning", "⚠️ 請確認密碼");
 			return;
 		}
 
 		if (this.value_pass !== this.value_repass) {
-			this.messageEl.style.color = 'red';
-			this.messageEl.setText("❌ 兩次密碼不一致");
+			this.setMessageState("password_modal__message--error", "❌ 兩次密碼不一致");
 			return;
 		}
 
 		if (this.value_pass.length < 1) {
-			this.messageEl.style.color = 'red';
-			this.messageEl.setText("❌ 密碼長度至少 1 個字元");
+			this.setMessageState("password_modal__message--error", "❌ 密碼長度至少 1 個字元");
 			return;
 		}
 
-		this.messageEl.style.color = 'green';
-		this.messageEl.setText("✅ 密碼格式正確");
+		this.setMessageState("password_modal__message--success", "✅ 密碼格式正確");
 	}
 
 	async hashPassword(password: string): Promise<string> {
@@ -176,28 +173,24 @@ export class ModalSetPassword extends Modal {
 		// 驗證舊密碼（變更密碼時）
 		if (this.isChangingPassword) {
 			if (!this.value_oldpass) {
-				this.messageEl.style.color = 'red';
-				this.messageEl.setText("❌ 請輸入舊密碼");
+				this.setMessageState("password_modal__message--error", "❌ 請輸入舊密碼");
 				return;
 			}
 			const oldHash = await this.hashPassword(this.value_oldpass);
 			if (oldHash !== this.plugin.settings.password) {
-				this.messageEl.style.color = 'red';
-				this.messageEl.setText("❌ 舊密碼不正確");
+				this.setMessageState("password_modal__message--error", "❌ 舊密碼不正確");
 				return;
 			}
 		}
 
 		// 驗證新密碼
 		if (!this.value_pass || this.value_pass.length < 1) {
-			this.messageEl.style.color = 'red';
-			this.messageEl.setText("❌ 請輸入密碼");
+			this.setMessageState("password_modal__message--error", "❌ 請輸入密碼");
 			return;
 		}
 
 		if (this.value_pass !== this.value_repass) {
-			this.messageEl.style.color = 'red';
-			this.messageEl.setText("❌ 兩次密碼不一致");
+			this.setMessageState("password_modal__message--error", "❌ 兩次密碼不一致");
 			return;
 		}
 

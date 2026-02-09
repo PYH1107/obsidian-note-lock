@@ -5,13 +5,13 @@ import { App, Modal, Notice, Setting } from "obsidian";
  */
 export class PasswordInputModal extends Modal {
     password: string = "";
-    onSubmit: (password: string) => void;
+    onSubmit: (password: string) => void | Promise<void>;
     onCancel?: () => void;
     private isSubmitting: boolean = false;  // 防止重複提交
 
     constructor(
         app: App,
-        onSubmit: (password: string) => void,
+        onSubmit: (password: string) => void | Promise<void>,
         onCancel?: () => void
     ) {
         super(app);
