@@ -1,6 +1,7 @@
 import main from "../main";
 import { App, TFile, Menu, Notice, MarkdownView } from "obsidian";
 import { PasswordInputModal } from "./passwordInputModal";
+import { hashPassword } from "./crypto";
 
 export class FileMenuHandler {
     app: App;
@@ -88,7 +89,7 @@ export class FileMenuHandler {
             this.app,
             async (inputPassword) => {
                 // 驗證密碼：將輸入的密碼雜湊後與儲存的雜湊比對
-                const inputHash = await this.plugin.hashPassword(inputPassword);
+                const inputHash = await hashPassword(inputPassword);
                 const storedHash = this.plugin.settings.password;
                 if (inputHash === storedHash) {
                     // 密碼正確，執行永久解密

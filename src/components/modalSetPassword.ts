@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Setting } from "obsidian";
 import main from "../main";
+import { hashPassword } from "./crypto";
 
 export class ModalSetPassword extends Modal {
 	plugin: main;
@@ -161,14 +162,6 @@ export class ModalSetPassword extends Modal {
 		this.setMessageState("password_modal__message--success", "✅ 密碼格式正確");
 	}
 
-	async hashPassword(password: string): Promise<string> {
-		const encoder = new TextEncoder();
-		const data = encoder.encode(password);
-		const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-		const hashArray = Array.from(new Uint8Array(hashBuffer));
-		return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-	}
-
 	async comparePassword() {
 		// 驗證舊密碼（變更密碼時）
 		if (this.isChangingPassword) {
@@ -176,7 +169,7 @@ export class ModalSetPassword extends Modal {
 				this.setMessageState("password_modal__message--error", "❌ 請輸入舊密碼");
 				return;
 			}
-			const oldHash = await this.hashPassword(this.value_oldpass);
+			const oldHash = await hashPassword(this.value_oldpass);
 			if (oldHash !== this.plugin.settings.password) {
 				this.setMessageState("password_modal__message--error", "❌ 舊密碼不正確");
 				return;
@@ -195,7 +188,7 @@ export class ModalSetPassword extends Modal {
 		}
 
 		// 使用 SHA-256 雜湊密碼
-		const passwordHash = await this.hashPassword(this.value_pass);
+		const passwordHash = await hashPassword(this.value_pass);
 
 		// 設定密碼（只儲存雜湊密碼）
 		this.plugin.settings.password = passwordHash;
