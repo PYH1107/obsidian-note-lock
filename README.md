@@ -4,6 +4,29 @@
 
 
 
+## Quick Start
+
+### Docker
+
+```bash
+# 啟動開發環境
+docker compose up -d
+
+# 進入容器
+docker exec -it obsidian-protected-note-dev /bin/sh
+
+# 在容器內安裝依賴並建置
+npm install
+npm run build
+```
+
+### Local
+
+```bash
+npm install
+npm run build
+```
+
 ## 檔案結構
 
 ```
