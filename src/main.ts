@@ -12,7 +12,6 @@ import { ProtectionChecker } from "./components/protectionChecker";
 
 export default class PasswordPlugin extends Plugin {
 	settings: PluginSettings;
-	toggleFlag: boolean;
 
 	// 檔案保護元件
 	protectionChecker: ProtectionChecker;
@@ -29,7 +28,7 @@ export default class PasswordPlugin extends Plugin {
 	async onload() { //the obsidian lifecycle
 		await this.loadSettings();
 
-		this.app.workspace.onLayoutReady(async () => {
+		this.app.workspace.onLayoutReady(async () => { // refactor note1:其實我跟 obsidian 的 plugin 框架和 ts 都沒有很熟，這行跟 onload 的差異？為什麼有了外面的 onload 還需要這個？
 			// 初始化元件
 			this.protectionChecker = new ProtectionChecker(this.app);
 			this.accessTracker = new AccessTracker(); // session
@@ -39,8 +38,10 @@ export default class PasswordPlugin extends Plugin {
 			// 註冊右鍵選單
 			this.fileMenuHandler.registerFileMenu();
 
-			// 註冊檔案開啟事件 - 檢查保護狀態並要求密碼
-			this.registerEvent(
+			// 註冊檔案開啟事件 - 檢查保護狀態並要求密碼 
+			// refactor note4:這個這麼長，雖然很多都是在寫 console，但分頁判斷邏輯感覺是一間獨立的事情，是不是應該自己獨立出去一個檔案? main 是不是簡潔一點比較好？
+			// refactor note5: registerEvent 的用法是什麼？他是我命名的變數嗎？還是 obsidian 規範？
+			this.registerEvent( // refactor note2:為什麼要使用 registerEvent？這是一個好的變數名稱嗎？但即使有 comment 我還是看不出來他在做什麼。 this 是在幹嘛？
 				this.app.workspace.on('file-open', async (file) => {
 					console.debug('[Main] ========== file-open event triggered ==========');
 					console.debug('[Main] Current file:', file?.path || 'null (closing)');
@@ -51,7 +52,7 @@ export default class PasswordPlugin extends Plugin {
 						console.debug('[Main] Processing previous file:', this.previousFile.path);
 						console.debug('[Main] Is temporary access?', this.accessTracker.isTemporaryAccess(this.previousFile.path));
 
-						// 只對臨時訪問的檔案處理
+						// 只對臨時訪問的檔案處理 --> refactor note7: 承接 note 4，應該是這邊開始獨立出去：if is temporyaccess --> 然後就接這邊的邏輯
 						if (this.accessTracker.isTemporaryAccess(this.previousFile.path)) {
 							// 防止清除正在開啟的檔案的訪問權限
 							const isSameFile = file && file.path === this.previousFile.path;
@@ -70,6 +71,7 @@ export default class PasswordPlugin extends Plugin {
 								});
 							console.debug('[Main] Tab closing:', isTabClosing, ', autoEncryptOnClose:', this.settings.autoEncryptOnClose);
 
+							// refactor note6: 這個 if else 的邏輯感覺可以獨立出去一個 function 或者用 switch 會不會更好
 							if (isTabClosing && !isSameFile) {
 								// 分頁關閉：無條件清除訪問狀態，不受 justAllowedAccess 影響
 								this.accessTracker.clearAccess(this.previousFile.path);
@@ -78,7 +80,7 @@ export default class PasswordPlugin extends Plugin {
 							} else if (this.settings.autoEncryptOnClose && !isSameFile && !wasJustAllowed) {
 								// autoEncryptOnClose 開啟時切換檔案：清除訪問狀態
 								this.accessTracker.clearAccess(this.previousFile.path);
-								this.idleTimer.stop(this.previousFile.path);
+								this.idleTimer.stop(this.previousFile.path); //這邊跟上一個 if 重複了欸？
 								console.debug('[Main] ✅ Access cleared (autoEncrypt) for:', this.previousFile.path);
 							} else {
 								// 切換分頁：只停止計時器，保持訪問狀態
@@ -109,6 +111,7 @@ export default class PasswordPlugin extends Plugin {
 					console.debug('[Main] file-open event:', file.path);
 
 					// 檢查檔案是否受保護
+					// refactor note8: 為什麼在這裡檢查檔案是否受保護？這是對每一個新開啟的檔案都檢查嗎？那我們不是應該從最一開始先用 protectionChecker 去檢查 > 接著 檢查 temporary access（因為只有有 encrypt property 的才會有 temporary access） > 再接下來才是是否需要驗證 > 驗證
 					const isProtected = await this.protectionChecker.isProtected(file);
 					console.debug('[Main] isProtected result:', isProtected);
 					if (!isProtected) return;
@@ -137,6 +140,8 @@ export default class PasswordPlugin extends Plugin {
 				})
 			);
 
+			// refactor note9: 這個 layout-change 的監聽器是什麼時候會觸發？
+			// refactor note10: 這個不能併到 file-open 的監聽器嗎？
 			// 監聽 layout 變化，偵測分頁被關閉時清除存取權限
 			this.registerEvent(
 				this.app.workspace.on('layout-change', () => {
@@ -180,6 +185,7 @@ export default class PasswordPlugin extends Plugin {
 	/**
 	 * 要求輸入密碼以訪問受保護文件
 	 */
+	// refactor note11: 有沒有密碼的檢查是應該獨立的嗎？
 	async requestPasswordForFile(file: TFile): Promise<void> {
 		// 檢查是否已設定密碼
 		if (!this.settings.password) {

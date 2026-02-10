@@ -207,9 +207,6 @@ export class ModalSetPassword extends Modal {
 
 		await this.plugin.saveSettings();
 
-		//set the flag to true if our requirements are met.
-		this.plugin.toggleFlag = true;
-
 		new Notice("✅ 密碼已設定");
 
 		// 呼叫 onSubmit 回調
