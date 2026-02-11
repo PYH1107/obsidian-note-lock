@@ -132,7 +132,7 @@ export default class PasswordPlugin extends Plugin {
 	 * 處理開啟受保護檔案時的驗證邏輯
 	 */
 	private async handleOpeningProtectedFile(file: TFile): Promise<void> {
-		const isProtected = await this.protectionChecker.isProtected(file);
+		const isProtected = this.protectionChecker.isProtectedSync(file);
 		if (!isProtected) return;
 
 		const alreadyAccessed = this.accessTracker.isAccessedThisSession(file.path);
