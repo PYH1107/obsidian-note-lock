@@ -10,7 +10,7 @@
 		"noImplicitThis": true,
 		"noImplicitReturns": true,
 		"moduleResolution": "node",
-		"importHelpers": true,
+		"importHelpers": false,
 		"noUncheckedIndexedAccess": true,
 		"isolatedModules": true,
 		"strictNullChecks": true,
@@ -21,7 +21,8 @@
 			"DOM",
 			"ES5",
 			"ES6",
-			"ES7"
+			"ES7",
+			"ES2017"
 		]
 	},
 	"include": [
