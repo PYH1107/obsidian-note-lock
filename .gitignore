@@ -22,6 +22,7 @@ data.json
 .DS_Store
 deploy.sh
 NOTE.md
+AGENTS.md
 
 # Docker
 .dockerignore
