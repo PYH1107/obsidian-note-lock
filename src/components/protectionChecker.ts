@@ -23,19 +23,6 @@ export class ProtectionChecker {
     }
 
     /**
-     * 檢查文件是否受保護
-     */
-    async isProtected(file: TFile): Promise<boolean> {
-        try {
-            const metadata = this.app.metadataCache.getFileCache(file);
-            return metadata?.frontmatter?.protected === 'encrypted';
-        } catch (error) {
-            console.error('Error checking protection status:', error);
-            return false;
-        }
-    }
-
-    /**
      * 標記文件為受保護
      */
     async markAsProtected(file: TFile): Promise<void> {
