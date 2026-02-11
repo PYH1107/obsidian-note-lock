@@ -42,13 +42,13 @@ export default class PasswordPlugin extends Plugin {
 
 			// 監聽檔案開啟事件：處理前一個檔案的鎖定邏輯，並對新開啟的受保護檔案要求密碼
 			this.registerEvent(
-				this.app.workspace.on('file-open', async (file) => {
+				this.app.workspace.on('file-open', (file: TFile | null) => {
 					this.handleLeavingPreviousFile(file);
 					this.previousFile = file;
 
 					if (!file) return;
 
-					await this.handleOpeningProtectedFile(file);
+					this.handleOpeningProtectedFile(file);
 				})
 			);
 
@@ -131,7 +131,7 @@ export default class PasswordPlugin extends Plugin {
 	/**
 	 * 處理開啟受保護檔案時的驗證邏輯
 	 */
-	private async handleOpeningProtectedFile(file: TFile): Promise<void> {
+	private handleOpeningProtectedFile(file: TFile): void {
 		const isProtected = this.protectionChecker.isProtectedSync(file);
 		if (!isProtected) return;
 
@@ -145,13 +145,13 @@ export default class PasswordPlugin extends Plugin {
 			return;
 		}
 
-		await this.requestPasswordForFile(file);
+		this.requestPasswordForFile(file);
 	}
 
 	/**
 	 * 要求輸入密碼以訪問受保護文件
 	 */
-	async requestPasswordForFile(file: TFile): Promise<void> {
+	requestPasswordForFile(file: TFile): void {
 		// 檢查是否已設定密碼
 		if (!this.settings.password) {
 			new Notice("請先在設定中設定密碼");
