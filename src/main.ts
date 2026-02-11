@@ -30,7 +30,7 @@ export default class PasswordPlugin extends Plugin {
 		await this.loadSettings();
 
 		// onLayoutReady: 等待 Obsidian UI 完全就緒後才初始化（onload 時 workspace 可能還沒準備好）
-		this.app.workspace.onLayoutReady(async () => {
+		this.app.workspace.onLayoutReady(() => {
 			// 初始化元件
 			this.protectionChecker = new ProtectionChecker(this.app);
 			this.accessTracker = new AccessTracker(); // session
