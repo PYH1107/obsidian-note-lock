@@ -1,7 +1,7 @@
 {
 	"id": "note-lock",
 	"name": "Note Lock",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "1.11.7",
 	"description": "Password-protect individual notes with per-file idle auto-lock.",
 	"author": "PAN, YUN-HUEI",
