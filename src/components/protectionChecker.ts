@@ -28,9 +28,7 @@ export class ProtectionChecker {
     async isProtected(file: TFile): Promise<boolean> {
         try {
             const metadata = this.app.metadataCache.getFileCache(file);
-            const isProtected = metadata?.frontmatter?.protected === 'encrypted';
-            console.debug('[ProtectionChecker] isProtected:', file.path, isProtected);
-            return isProtected;
+            return metadata?.frontmatter?.protected === 'encrypted';
         } catch (error) {
             console.error('Error checking protection status:', error);
             return false;
@@ -49,8 +47,6 @@ export class ProtectionChecker {
 
             // 等待 metadata cache 更新
             await this.waitForMetadataUpdate(file);
-
-            console.debug('[ProtectionChecker] File marked as protected:', file.path);
         } catch (error) {
             console.error('[ProtectionChecker] Error marking file as protected:', error);
             throw error;
@@ -68,8 +64,6 @@ export class ProtectionChecker {
 
             // 等待 metadata cache 更新
             await this.waitForMetadataUpdate(file);
-
-            console.debug('[ProtectionChecker] Protection removed from file:', file.path);
         } catch (error) {
             console.error('[ProtectionChecker] Error removing protection:', error);
             throw error;

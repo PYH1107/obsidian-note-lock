@@ -43,10 +43,6 @@ export default class PasswordPlugin extends Plugin {
 			// 監聽檔案開啟事件：處理前一個檔案的鎖定邏輯，並對新開啟的受保護檔案要求密碼
 			this.registerEvent(
 				this.app.workspace.on('file-open', async (file) => {
-					console.debug('[Main] ========== file-open event triggered ==========');
-					console.debug('[Main] Current file:', file?.path || 'null (closing)');
-					console.debug('[Main] Previous file:', this.previousFile?.path || 'null');
-
 					this.handleLeavingPreviousFile(file);
 					this.previousFile = file;
 
@@ -71,7 +67,6 @@ export default class PasswordPlugin extends Plugin {
 
 					for (const filePath of this.accessTracker.getTemporaryAccess()) {
 						if (!openPaths.has(filePath)) {
-							console.debug('[Main] 🔒 Tab closed detected via layout-change, clearing access for:', filePath);
 							this.accessTracker.clearAccess(filePath);
 							this.idleTimer.stop(filePath);
 						}
@@ -106,7 +101,6 @@ export default class PasswordPlugin extends Plugin {
 		const prevPath = this.previousFile.path;
 
 		if (!this.accessTracker.isTemporaryAccess(prevPath)) {
-			console.debug('[Main] Previous file is NOT temporary access, skipping');
 			return;
 		}
 
@@ -129,9 +123,6 @@ export default class PasswordPlugin extends Plugin {
 
 		if (shouldClearAccess) {
 			this.accessTracker.clearAccess(prevPath);
-			console.debug('[Main] ✅ Access cleared for:', prevPath);
-		} else {
-			console.debug('[Main] ⏸️ Keeping access for:', prevPath);
 		}
 
 		this.justAllowedAccess.delete(prevPath);
@@ -170,7 +161,6 @@ export default class PasswordPlugin extends Plugin {
 		}
 
 		// 顯示密碼輸入框
-		console.debug('[Main] 🔐 Opening password modal for:', file.path);
 		const modal = new PasswordInputModal(
 			this.app,
 			async (inputPassword) => {
@@ -179,21 +169,16 @@ export default class PasswordPlugin extends Plugin {
 				const storedHash = this.settings.password;
 				if (inputHash === storedHash) {
 					// 密碼正確，標記為已訪問
-					console.debug('[Main] ✅ Password correct, marking as temporary access:', file.path);
 					this.accessTracker.markAsTemporaryAccess(file.path);
-					console.debug('[Main] After marking, all accessed files:', this.accessTracker.getAccessedFiles());
 					new Notice(`已驗證：${file.name}`);
 
 					// 啟動閒置計時器
 					this.startIdleTimer(file);
 
 					// 重新打開檔案以正確渲染
-					console.debug('[Main] 🔄 Re-opening file:', file.path);
 					await this.app.workspace.getLeaf().openFile(file);
-					console.debug('[Main] ✅ File re-opened successfully');
 				} else {
 					// 密碼錯誤
-					console.debug('[Main] ❌ Password incorrect for:', file.path);
 					new Notice("密碼錯誤");
 					// 關閉文件
 					this.app.workspace.getLeaf().detach();
@@ -201,12 +186,10 @@ export default class PasswordPlugin extends Plugin {
 			},
 			() => {
 				// 取消時關閉文件
-				console.debug('[Main] ❌ Password modal cancelled for:', file.path);
 				new Notice("已取消");
 				this.app.workspace.getLeaf().detach();
 			}
 		);
-		console.debug('[Main] 🔓 Password modal opened');
 		modal.open();
 	}
 
@@ -217,10 +200,8 @@ export default class PasswordPlugin extends Plugin {
 		const idleTimeMinutes = parseInt(this.settings.autoLock) || 5;
 		const idleTimeMs = idleTimeMinutes * 60 * 1000;
 
-		console.debug('[Main] Starting idle timer for:', file.path, 'duration:', idleTimeMs, 'ms');
 		this.idleTimer.start(file.path, idleTimeMs, () => {
 			// 閒置時間到，清除訪問狀態
-			console.debug('[Main] ⏰ Idle timer triggered for:', file.path);
 			this.accessTracker.clearAccess(file.path);
 			new Notice(`${file.name} 已鎖定，需要重新驗證密碼`);
 

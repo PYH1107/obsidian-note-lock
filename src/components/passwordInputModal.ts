@@ -48,7 +48,6 @@ export class PasswordInputModal extends Modal {
                 // 按 Enter 提交
                 text.inputEl.addEventListener("keydown", (e) => {
                     if (e.key === "Enter") {
-                        console.debug('[PasswordInputModal] ⌨️  Enter key pressed');
                         e.preventDefault();  // 防止 Enter 鍵觸發其他事件
                         this.submit();
                     }
@@ -64,7 +63,6 @@ export class PasswordInputModal extends Modal {
         // 取消按鈕
         const cancelButton = buttonContainer.createEl("button", { text: "取消" });
         cancelButton.addEventListener("click", () => {
-            console.debug('[PasswordInputModal] ❌ Cancel button clicked');
             this.close();
         });
 
@@ -74,32 +72,25 @@ export class PasswordInputModal extends Modal {
             cls: "mod-cta",
         });
         submitButton.addEventListener("click", () => {
-            console.debug('[PasswordInputModal] 🖱️  Submit button clicked');
             this.submit();
         });
     }
 
     submit() {
-        console.debug('[PasswordInputModal] Submit called, isSubmitting:', this.isSubmitting);
-
         // 防止重複提交
         if (this.isSubmitting) {
-            console.debug('[PasswordInputModal] ⚠️ Already submitting, ignoring');
             return;
         }
 
         if (!this.password) {
-            console.debug('[PasswordInputModal] ❌ Password is empty');
             new Notice("⚠️ 請輸入密碼");
             return;
         }
 
-        console.debug('[PasswordInputModal] ✅ Password valid, submitting');
         this.isSubmitting = true;
 
         // 先關閉 modal,再執行回調
         this.close();
-        console.debug('[PasswordInputModal] 🔒 Modal closed, executing callback');
         void this.onSubmit(this.password);
     }
 
@@ -115,7 +106,6 @@ export class PasswordInputModal extends Modal {
 
         // 非提交關閉（x 按鈕、Escape、取消按鈕）時觸發取消回調
         if (!this.isSubmitting && this.onCancel) {
-            console.debug('[PasswordInputModal] ❌ Modal closed without submit, triggering cancel');
             this.onCancel();
         }
     }
