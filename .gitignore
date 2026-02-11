@@ -20,5 +20,9 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
-
 deploy.sh
+NOTE.md
+
+# Docker
+.dockerignore
+docker-compose.yml
