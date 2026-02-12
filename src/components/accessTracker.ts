@@ -2,10 +2,7 @@
  * 追蹤受保護檔案的訪問狀態
  */
 export class AccessTracker {
-    // 本次會話中已驗證密碼的檔案
     private accessedThisSession: Set<string>;
-
-    // 臨時訪問的檔案（需要重新驗證密碼）
     private temporaryAccess: Set<string>;
 
     constructor() {
@@ -14,25 +11,11 @@ export class AccessTracker {
     }
 
     /**
-     * 標記檔案為「本次已訪問」
-     */
-    markAsAccessed(filePath: string): void {
-        this.accessedThisSession.add(filePath);
-    }
-
-    /**
      * 標記檔案為臨時訪問（需要重新驗證）
      */
     markAsTemporaryAccess(filePath: string): void {
         this.temporaryAccess.add(filePath);
         this.accessedThisSession.add(filePath);
-    }
-
-    /**
-     * 從臨時訪問列表中移除
-     */
-    removeTemporaryAccess(filePath: string): void {
-        this.temporaryAccess.delete(filePath);
     }
 
     /**
@@ -47,13 +30,6 @@ export class AccessTracker {
      */
     getTemporaryAccess(): string[] {
         return Array.from(this.temporaryAccess);
-    }
-
-    /**
-     * 取得所有本次訪問的檔案
-     */
-    getAccessedFiles(): string[] {
-        return Array.from(this.accessedThisSession);
     }
 
     /**
