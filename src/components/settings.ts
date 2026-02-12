@@ -7,14 +7,14 @@ export interface PluginSettings {
 	// 密碼設定
 	password: string; // SHA-256 雜湊密碼（用於驗證）
 	passwordHint: string; // 密碼提示問題
-	autoLock: string;
+	autoLock: number;
 	autoEncryptOnClose: boolean;
 }
 
 export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	password: "",
 	passwordHint: "",
-	autoLock: "5",
+	autoLock: 5,
 	autoEncryptOnClose: false,
 };
 
@@ -70,13 +70,14 @@ export class SettingsTab extends PluginSettingTab {
 			.setName(t("settings_idle_lock_name"))
 			.setDesc(t("settings_idle_lock_desc"))
 			.addText((text) => {
-				text.setValue(this.plugin.settings.autoLock).onChange(
+				text.setValue(String(this.plugin.settings.autoLock)).onChange(
 					async (value) => {
-						if (/^\d+$/.test(value)) {
-							this.plugin.settings.autoLock = value;
+						const parsed = parseInt(value);
+						if (!isNaN(parsed) && parsed > 0) {
+							this.plugin.settings.autoLock = parsed;
 							await this.plugin.saveSettings();
 						}
-					} //refactor note 6: do we really nead "async" here? 就是這個 await 是對應到 async 的嗎？所以是符合那個 if 的條件就會用到 async-await，不符合就不會？
+					}
 				);
 			});
 

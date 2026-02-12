@@ -206,7 +206,7 @@ export default class PasswordPlugin extends Plugin {
 	 * 啟動閒置計時器
 	 */
 	startIdleTimer(file: TFile) {
-		const idleTimeMinutes = parseInt(this.settings.autoLock) || 5;
+		const idleTimeMinutes = this.settings.autoLock || 5;
 		const idleTimeMs = idleTimeMinutes * 60 * 1000;
 
 		this.idleTimer.start(file.path, idleTimeMs, () => {
