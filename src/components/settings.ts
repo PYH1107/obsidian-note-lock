@@ -51,7 +51,6 @@ export class SettingsTab extends PluginSettingTab {
 						const modal = new ModalSetPassword(
 							this.app,
 							this.plugin,
-							'obsidian', // passwordType
 							() => {
 								new Notice(t("msg_password_set"));
 								this.display();
