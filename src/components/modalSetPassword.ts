@@ -9,7 +9,6 @@ export class ModalSetPassword extends Modal {
 	value_pass: string;
 	value_repass: string;
 	value_hint: string;
-	passwordType: 'obsidian' | 'file';
 	onSubmit?: () => void;
 	messageEl: HTMLElement;
 	isChangingPassword: boolean;
@@ -17,12 +16,10 @@ export class ModalSetPassword extends Modal {
 	constructor(
 		app: App,
 		plugin: main,
-		passwordType: 'obsidian' | 'file' = 'obsidian',
 		onSubmit?: () => void
 	) {
 		super(app);
 		this.plugin = plugin;
-		this.passwordType = passwordType;
 		this.value_oldpass = "";
 		this.value_pass = "";
 		this.value_repass = "";
