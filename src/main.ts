@@ -7,9 +7,8 @@ import {
 import { AccessTracker } from "./components/accessTracker";
 import { FileMenuHandler } from "./components/fileMenuHandler";
 import { IdleTimer } from "./components/idleTimer";
-import { PasswordInputModal } from "./components/passwordInputModal";
+import { showPasswordVerification } from "./components/passwordInputModal";
 import { ProtectionChecker } from "./components/protectionChecker";
-import { hashPassword } from "./components/crypto";
 import { t } from "./i18n";
 
 export default class PasswordPlugin extends Plugin {
@@ -156,42 +155,51 @@ export default class PasswordPlugin extends Plugin {
 		// 檢查是否已設定密碼
 		if (!this.settings.password) {
 			new Notice(t("msg_set_password_first"));
-			// 關閉文件
 			this.app.workspace.getLeaf().detach();
 			return;
 		}
 
-		// 顯示密碼輸入框
-		const modal = new PasswordInputModal(
-			this.app,
-			async (inputPassword) => {
-				// 驗證密碼：將輸入的密碼雜湊後與儲存的雜湊比對
-				const inputHash = await hashPassword(inputPassword);
-				const storedHash = this.settings.password;
-				if (inputHash === storedHash) {
-					// 密碼正確，標記為已訪問
-					this.accessTracker.markAsTemporaryAccess(file.path);
-					new Notice(t("msg_verified", { name: file.name }));
-
-					// 啟動閒置計時器
-					this.startIdleTimer(file);
-
-					// 重新打開檔案以正確渲染
-					await this.app.workspace.getLeaf().openFile(file);
-				} else {
-					// 密碼錯誤
-					new Notice(t("msg_wrong_password"));
-					// 關閉文件
-					this.app.workspace.getLeaf().detach();
-				}
+		showPasswordVerification(this.app, this.settings.password, {
+			onSuccess: async () => {
+				this.accessTracker.markAsTemporaryAccess(file.path);
+				new Notice(t("msg_verified", { name: file.name }));
+				this.startIdleTimer(file);
+				await this.app.workspace.getLeaf().openFile(file);
 			},
-			() => {
-				// 取消時關閉文件
+			onFailure: () => {
+				new Notice(t("msg_wrong_password"));
+				this.app.workspace.getLeaf().detach();
+			},
+			onCancel: () => {
 				new Notice(t("msg_cancelled"));
 				this.app.workspace.getLeaf().detach();
-			}
-		);
-		modal.open();
+			},
+		});
+	}
+
+	/**
+	 * 要求輸入密碼以永久移除文件保護
+	 */
+	requestRemoveProtection(file: TFile): void {
+		showPasswordVerification(this.app, this.settings.password, {
+			onSuccess: async () => {
+				try {
+					await this.protectionChecker.removeProtection(file);
+					this.accessTracker.clearAccess(file.path);
+					this.idleTimer.stop(file.path);
+					new Notice(t("msg_decrypted", { name: file.name }));
+				} catch (error) {
+					console.error('[PasswordPlugin] Error in requestRemoveProtection:', error);
+					new Notice(t("msg_decrypt_failed", { message: (error as Error).message }));
+				}
+			},
+			onFailure: () => {
+				new Notice(t("msg_wrong_password_decrypt"));
+			},
+			onCancel: () => {
+				new Notice(t("msg_decrypt_cancelled"));
+			},
+		});
 	}
 
 	/**
