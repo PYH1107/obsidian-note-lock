@@ -7,7 +7,6 @@ export interface PluginSettings {
 	// 密碼設定
 	password: string; // SHA-256 雜湊密碼（用於驗證）
 	passwordHint: string; // 密碼提示問題
-	animations: boolean;
 	autoLock: string;
 	autoEncryptOnClose: boolean;
 }
@@ -15,7 +14,6 @@ export interface PluginSettings {
 export const DEFAULT_SETTINGS: Partial<PluginSettings> = {
 	password: "",
 	passwordHint: "",
-	animations: true,
 	autoLock: "5",
 	autoEncryptOnClose: false,
 };
@@ -64,6 +62,7 @@ export class SettingsTab extends PluginSettingTab {
 			);
 
 		// ========== 2. 進階設定 ==========
+		//refactor note 5: lack clear explanations, and what does "new" mean?
 		new Setting(containerEl)
 			.setName(t("settings_advanced_heading"))
 			.setHeading();
@@ -78,11 +77,12 @@ export class SettingsTab extends PluginSettingTab {
 							this.plugin.settings.autoLock = value;
 							await this.plugin.saveSettings();
 						}
-					}
+					} //refactor note 6: do we really nead "async" here? 就是這個 await 是對應到 async 的嗎？所以是符合那個 if 的條件就會用到 async-await，不符合就不會？
 				);
 			});
 
 		// ========== 3. 檔案級加密設定 ==========
+		//refactor note 7: lack clear explanations, same as 5. 就算是 i8n 也要寫清楚吧
 		new Setting(containerEl)
 			.setName(t("settings_file_encryption_heading"))
 			.setHeading();
