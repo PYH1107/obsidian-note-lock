@@ -27,6 +27,8 @@ export class SettingsTab extends PluginSettingTab {
 	}
 
 	display(): void {
+		// containerEl 是 Obsidian 提供的空白 <div>，代表此 plugin 的設定頁面
+		// new Setting(containerEl) 會在裡面插入一行設定項（標題、輸入框、開關等）
 		let { containerEl } = this;
 
 		containerEl.empty();
@@ -61,7 +63,6 @@ export class SettingsTab extends PluginSettingTab {
 			);
 
 		// ========== 2. 進階設定 ==========
-		//refactor note 5: lack clear explanations, and what does "new" mean?
 		new Setting(containerEl)
 			.setName(t("settings_advanced_heading"))
 			.setHeading();
@@ -82,7 +83,6 @@ export class SettingsTab extends PluginSettingTab {
 			});
 
 		// ========== 3. 檔案級加密設定 ==========
-		//refactor note 7: lack clear explanations, same as 5. 就算是 i8n 也要寫清楚吧
 		new Setting(containerEl)
 			.setName(t("settings_file_encryption_heading"))
 			.setHeading();
