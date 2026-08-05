@@ -1,6 +1,7 @@
 # Note Lock
 
 Password-protect individual notes in your Obsidian vault. Unlike folder-level protection plugins, Note Lock lets you lock specific files — right-click any markdown file to protect it.
+[Obsidian Plugins Community](https://community.obsidian.md/plugins/note-lock)
 
 ## Features
 
